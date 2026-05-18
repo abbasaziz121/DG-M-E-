@@ -1,0 +1,6 @@
+{
+  "name": "DG HEALTH OFFICE M&E APP",
+  "description": "A comprehensive supervisory checklist and monitoring tool for provincial health officials to audit and track facility performance.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}
