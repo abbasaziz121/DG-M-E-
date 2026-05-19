@@ -348,11 +348,14 @@ export default function App() {
     const totalPossiblePoints = validScores.length * 5;
     const totalScore = totalPossiblePoints > 0 ? Math.round((totalPoints / totalPossiblePoints) * 100) : 0;
     
+    const now = new Date();
+    const formattedDate = `${now.toISOString().split('T')[0]} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const currentYear = now.getFullYear();
     const newVisitNum = visits.length + 1;
     const newVisit = {
-      id: `V-2024-00${newVisitNum}`,
+      id: `V-${currentYear}-${newVisitNum.toString().padStart(3, '0')}`,
       facilityName: selectedFacility.name,
-      date: new Date().toISOString().split('T')[0],
+      date: formattedDate,
       score: totalScore,
       status: 'Processed',
       rating: extraInfo.rating,
@@ -417,7 +420,7 @@ export default function App() {
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
-    XLSX.writeFile(workbook, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date}.xlsx`);
+    XLSX.writeFile(workbook, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date.replace(/[:\s]/g, '_')}.xlsx`);
   };
 
   const downloadSingleWord = async (v: any) => {
@@ -497,7 +500,7 @@ export default function App() {
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date}.docx`);
+    saveAs(blob, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date.replace(/[:\s]/g, '_')}.docx`);
   };
 
   const exportAuditHistoryToWord = async () => {
