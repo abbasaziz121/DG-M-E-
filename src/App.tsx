@@ -430,7 +430,7 @@ export default function App() {
                 <div className="h-0.5 w-12 bg-blue-600 rounded-full opacity-20"></div>
               </div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
-                HEALTH MONITORING PORTAL
+                DG HEALTH M&E PORTAL
               </h1>
               <p className="text-xs font-bold text-slate-400 mt-2 uppercase tracking-widest px-4">
                 {authMode === 'login' 
@@ -691,8 +691,8 @@ export default function App() {
             <Activity size={24} />
           </div>
           <div className="text-center">
-            <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Health Oversight</h1>
-            <p className="mt-0.5 text-[10px] font-black uppercase tracking-tight text-blue-600">Smart M&E System</p>
+            <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-400">DG Health M&E</h1>
+            <p className="mt-0.5 text-[10px] font-black uppercase tracking-tight text-blue-600">Provincial Portal</p>
           </div>
         </div>
 
@@ -757,7 +757,7 @@ export default function App() {
             <div className="p-2 bg-blue-600 rounded-xl text-white shadow-md">
               <Activity size={20} />
             </div>
-            <h1 className="font-black text-[10px] text-blue-600 tracking-tighter uppercase">Health Oversight</h1>
+            <h1 className="font-black text-[10px] text-blue-600 tracking-tighter uppercase">DG Health M&E</h1>
           </div>
           
           <div className="flex-1 max-w-md hidden md:block">
