@@ -423,13 +423,14 @@ export default function App() {
           <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20">
             {/* Header Section */}
             <div className="bg-slate-50/50 p-8 pt-10 text-center border-b border-slate-100">
-              <div className="mb-6 flex justify-center">
+              <div className="mb-6 flex flex-col items-center gap-4">
                 <img 
-                  src="/input_file_0.png" 
+                  src="/input_file_2.png" 
                   alt="KP Health Logo" 
-                  className="h-28 w-auto object-contain" 
+                  className="h-32 w-auto object-contain drop-shadow-md" 
                   referrerPolicy="no-referrer"
                 />
+                <div className="h-0.5 w-12 bg-blue-600 rounded-full opacity-20"></div>
               </div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
                 DG HEALTH M&E PORTAL
@@ -688,15 +689,17 @@ export default function App() {
     <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-100 italic-selection">
       {/* Sidebar Navigation */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col hidden lg:flex">
-        <div className="p-6 border-b border-slate-100 mb-2">
+        <div className="p-6 border-b border-slate-100 mb-2 flex flex-col items-center">
           <img 
-            src="/input_file_1.png" 
+            src="/input_file_2.png" 
             alt="KP Health Logo" 
-            className="h-16 w-auto object-contain mb-2 mx-auto" 
+            className="h-20 w-auto object-contain mb-3" 
             referrerPolicy="no-referrer"
           />
-          <h1 className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center">DG Health M&E</h1>
-          <p className="mt-0.5 text-[9px] font-black uppercase tracking-tight text-blue-600 text-center">Provincial Portal</p>
+          <div className="text-center">
+            <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-400">DG Health M&E</h1>
+            <p className="mt-0.5 text-[10px] font-black uppercase tracking-tight text-blue-600">Provincial Portal</p>
+          </div>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
@@ -758,7 +761,7 @@ export default function App() {
         <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3 lg:hidden">
             <img 
-              src="/input_file_1.png" 
+              src="/input_file_2.png" 
               alt="Logo" 
               className="h-10 w-auto" 
               referrerPolicy="no-referrer"
@@ -834,9 +837,17 @@ export default function App() {
                 className="space-y-8"
               >
                 <div className="flex items-end justify-between">
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900">Health Monitoring Overview</h2>
-                    <p className="text-slate-500 mt-1">Real-time performance metrics across the province.</p>
+                  <div className="flex items-center gap-6">
+                    <img 
+                      src="/input_file_2.png" 
+                      alt="KP Health Logo" 
+                      className="h-16 w-auto object-contain" 
+                      referrerPolicy="no-referrer"
+                    />
+                    <div>
+                      <h2 className="text-3xl font-bold tracking-tight text-slate-900">Health Monitoring Overview</h2>
+                      <p className="text-slate-500 mt-1">Real-time performance metrics across the province.</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-lg border border-slate-200">
                     <TrendingUp size={16} className="text-green-500" />
