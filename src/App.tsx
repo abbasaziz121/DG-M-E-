@@ -38,10 +38,14 @@ import {
   ShieldAlert,
   KeyRound,
   Sliders,
-  Award
+  Award,
+  FileText,
+  FileSpreadsheet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle } from 'docx';
+import { saveAs } from 'file-saver';
 import { 
   BarChart, 
   Bar, 
@@ -397,6 +401,150 @@ export default function App() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Audit History");
     XLSX.writeFile(workbook, `Health_Audit_History_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const downloadSingleExcel = (v: any) => {
+    const dataToExport = [{
+      'Visit ID': v.id,
+      'Facility Name': v.facilityName,
+      'Date': v.date,
+      'Performance Score (%)': v.score,
+      'Rating': v.rating,
+      'Status': v.status,
+      'Notes': v.notes || 'No notes provided',
+      'Auditor': 'DG Health Official'
+    }];
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
+    XLSX.writeFile(workbook, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date}.xlsx`);
+  };
+
+  const downloadSingleWord = async (v: any) => {
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            text: "DG HEALTH M&E PORTAL",
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "OFFICIAL AUDIT REPORT",
+                bold: true,
+                size: 28,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+          new Paragraph({ text: "" }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Visit ID", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ text: `#${v.id}` })] }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Facility Name", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ text: v.facilityName })] }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Audit Date", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ text: v.date })] }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Score", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ text: `${v.score}% (${v.rating})` })] }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Status", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ text: v.status })] }),
+                ],
+              }),
+            ],
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Findings & Notes:", bold: true, underline: {} }),
+            ],
+          }),
+          new Paragraph({
+            text: v.notes || "No additional notes provided during this audit.",
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "This is a computer-generated report from the DG Health M&E Provincial Portal.", italics: true, size: 16 }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date}.docx`);
+  };
+
+  const exportAuditHistoryToWord = async () => {
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            text: "DG HEALTH M&E PORTAL",
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+          }),
+          new Paragraph({
+            text: "Comprehensive Audit History Log",
+            heading: HeadingLevel.HEADING_2,
+            alignment: AlignmentType.CENTER,
+          }),
+          new Paragraph({ text: "" }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "ID", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Facility", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Date", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Score", bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Status", bold: true })] })] }),
+                ],
+              }),
+              ...visits.map(v => new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ text: v.id })] }),
+                  new TableCell({ children: [new Paragraph({ text: v.facilityName })] }),
+                  new TableCell({ children: [new Paragraph({ text: v.date })] }),
+                  new TableCell({ children: [new Paragraph({ text: `${v.score}%` })] }),
+                  new TableCell({ children: [new Paragraph({ text: v.status })] }),
+                ],
+              })),
+            ],
+          }),
+        ],
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `Health_Audit_History_${new Date().toISOString().split('T')[0]}.docx`);
   };
 
   const filteredFacilities = useMemo(() => {
@@ -1446,13 +1594,22 @@ export default function App() {
                     <h2 className="text-2xl font-bold text-slate-900">Audit History</h2>
                     <p className="text-slate-500">Comprehensive log of past facility inspections and scores.</p>
                   </div>
-                  <button 
-                    onClick={exportAuditHistory}
-                    className="btn-secondary"
-                  >
-                    <Download size={16} />
-                    <span>Export to Excel</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={exportAuditHistory}
+                      className="btn-secondary"
+                    >
+                      <FileSpreadsheet size={16} />
+                      <span>Bulk Excel</span>
+                    </button>
+                    <button 
+                      onClick={exportAuditHistoryToWord}
+                      className="btn-secondary"
+                    >
+                      <FileText size={16} />
+                      <span>Bulk Word</span>
+                    </button>
+                  </div>
                 </div>
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                   <table className="w-full text-left">
@@ -1486,7 +1643,23 @@ export default function App() {
                              <span className="status-badge bg-emerald-100 text-emerald-700">{visit.status}</span>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <button className="text-sm font-bold text-blue-600 hover:underline">View</button>
+                            <div className="flex items-center justify-end gap-2">
+                              <button 
+                                onClick={() => downloadSingleExcel(visit)}
+                                className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"
+                                title="Download Excel"
+                              >
+                                <FileSpreadsheet size={16} />
+                              </button>
+                              <button 
+                                onClick={() => downloadSingleWord(visit)}
+                                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                                title="Download Word"
+                              >
+                                <FileText size={16} />
+                              </button>
+                              <button className="text-sm font-bold text-blue-600 hover:underline px-2">View</button>
+                            </div>
                           </td>
                         </tr>
                       ))}
