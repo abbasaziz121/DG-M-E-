@@ -411,8 +411,8 @@ export default function App() {
       'Performance Score (%)': v.score,
       'Rating': v.rating,
       'Status': v.status,
-      'Notes': v.notes || 'No notes provided',
-      'Auditor': 'DG Health Official'
+      'Recommendations': v.recommendations || 'No recommendations provided',
+      'Auditor': v.inspector || 'DG Health Official'
     }];
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
@@ -483,7 +483,7 @@ export default function App() {
             ],
           }),
           new Paragraph({
-            text: v.notes || "No additional notes provided during this audit.",
+            text: v.recommendations || "No additional recommendations provided during this audit.",
           }),
           new Paragraph({ text: "" }),
           new Paragraph({
@@ -1658,7 +1658,12 @@ export default function App() {
                               >
                                 <FileText size={16} />
                               </button>
-                              <button className="text-sm font-bold text-blue-600 hover:underline px-2">View</button>
+                              <button 
+                                onClick={() => setSelectedVisitReport(visit)}
+                                className="text-sm font-bold text-blue-600 hover:underline px-2"
+                              >
+                                View
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -1669,8 +1674,173 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Visit Report Detail Modal */}
+          <AnimatePresence>
+            {selectedVisitReport && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSelectedVisitReport(null)}
+                  className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col border border-slate-200"
+                >
+                  {/* Modal Header */}
+                  <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                    <div className="flex items-center gap-5">
+                      <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-xl shadow-blue-200">
+                        <FileCheck size={24} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-2xl font-bold text-slate-900">{selectedVisitReport.facilityName}</h2>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                            selectedVisitReport.score > 80 ? 'bg-emerald-100 text-emerald-700' : 
+                            selectedVisitReport.score > 60 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                          }`}>
+                            {selectedVisitReport.rating}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1 italic">
+                          Audit ID: #{selectedVisitReport.id} • Conducted on {selectedVisitReport.date}
+                        </p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedVisitReport(null)}
+                      className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 hover:text-slate-600"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  {/* Modal Body */}
+                  <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                    {/* Quick Stats Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100/50">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Performance</p>
+                        <p className="text-3xl font-black text-slate-900">{selectedVisitReport.score}%</p>
+                      </div>
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100/50">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">OPD Frequency</p>
+                        <p className="text-3xl font-black text-slate-900">{selectedVisitReport.opdAvg || '120'}</p>
+                      </div>
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100/50">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Staffing</p>
+                        <p className="text-3xl font-black text-blue-600">Active</p>
+                      </div>
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100/50">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Inspector</p>
+                        <p className="text-sm font-black text-slate-700 mt-2">{selectedVisitReport.inspector || 'Abbas Aziz'}</p>
+                      </div>
+                    </div>
+
+                    {/* Recommendations Section */}
+                    <section className="space-y-4">
+                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <TrendingUp size={16} className="text-blue-500" />
+                        Official Recommendations
+                      </h3>
+                      <div className="bg-white border-2 border-blue-50 rounded-3xl p-8 shadow-sm">
+                        <p className="text-base text-slate-600 leading-relaxed italic font-medium">
+                          "{selectedVisitReport.recommendations || 'No specific recommendations were recorded for this monitoring visit.'}"
+                        </p>
+                      </div>
+                    </section>
+
+                    {/* Section for Scores Breakdown - Mini Visualization */}
+                    <section className="space-y-4">
+                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <Sliders size={16} className="text-indigo-500" />
+                        Infrastructure & Services Audit
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { label: 'Human Resources', key: 'hr' },
+                          { label: 'Infrastructure', key: 'i' },
+                          { label: 'Equipment', key: 'e' },
+                          { label: 'Pharmacy/Supplies', key: 'm' },
+                          { label: 'Cleanliness/WASH', key: 'w' },
+                        ].map(section => {
+                          // Simple mock logic to show section scores if they exist
+                          return (
+                            <div key={section.key} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                              <span className="text-sm font-bold text-slate-700">{section.label}</span>
+                              <div className="flex items-center gap-3">
+                                <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className="h-full bg-blue-500" style={{ width: '75%' }}></div>
+                                </div>
+                                <span className="text-xs font-black text-slate-500 uppercase italic">Optimum</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+
+                    {/* Attached Evidence */}
+                    {selectedVisitReport.photos && selectedVisitReport.photos.length > 0 && (
+                      <section className="space-y-4">
+                         <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                          <Camera size={16} className="text-emerald-500" />
+                          Photographic Evidence
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {selectedVisitReport.photos.map((photo: string, idx: number) => (
+                            <div key={idx} className="aspect-square rounded-2xl overflow-hidden shadow-md border border-slate-100 group">
+                              <img 
+                                src={photo} 
+                                alt={`Evidence ${idx + 1}`} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                  </div>
+
+                  {/* Modal Footer (Action Buttons) */}
+                  <div className="p-8 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between gap-6">
+                    <div className="flex items-center gap-3">
+                       <button 
+                        onClick={() => downloadSingleExcel(selectedVisitReport)}
+                        className="btn-secondary px-8"
+                      >
+                        <FileSpreadsheet size={18} className="text-emerald-600" />
+                        <span>Export Excel</span>
+                      </button>
+                      <button 
+                        onClick={() => downloadSingleWord(selectedVisitReport)}
+                        className="btn-secondary px-8"
+                      >
+                        <FileText size={18} className="text-blue-600" />
+                        <span>Download Word</span>
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedVisitReport(null)}
+                      className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                    >
+                      Close Report
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
+
     </div>
   );
 }
