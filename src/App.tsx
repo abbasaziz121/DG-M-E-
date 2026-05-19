@@ -68,7 +68,7 @@ export const OFFICER_PROFILES = [
     avatar: 'AA',
     color: 'bg-blue-600',
     description: 'Full provincial monitoring and approval authority across all health facilities.',
-    badge: 'KPK HQ',
+    badge: 'Regional HQ',
     isAdmin: true,
     isActive: true
   },
@@ -424,16 +424,13 @@ export default function App() {
             {/* Header Section */}
             <div className="bg-slate-50/50 p-8 pt-10 text-center border-b border-slate-100">
               <div className="mb-6 flex flex-col items-center gap-4">
-                <img 
-                  src="/input_file_2.png" 
-                  alt="KP Health Logo" 
-                  className="h-32 w-auto object-contain drop-shadow-md" 
-                  referrerPolicy="no-referrer"
-                />
+                <div className="p-5 bg-blue-600 rounded-[2rem] text-white shadow-2xl shadow-blue-200 flex items-center justify-center">
+                  <Activity size={48} />
+                </div>
                 <div className="h-0.5 w-12 bg-blue-600 rounded-full opacity-20"></div>
               </div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
-                DG HEALTH M&E PORTAL
+                HEALTH MONITORING PORTAL
               </h1>
               <p className="text-xs font-bold text-slate-400 mt-2 uppercase tracking-widest px-4">
                 {authMode === 'login' 
@@ -690,22 +687,19 @@ export default function App() {
       {/* Sidebar Navigation */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col hidden lg:flex">
         <div className="p-6 border-b border-slate-100 mb-2 flex flex-col items-center">
-          <img 
-            src="/input_file_2.png" 
-            alt="KP Health Logo" 
-            className="h-20 w-auto object-contain mb-3" 
-            referrerPolicy="no-referrer"
-          />
+          <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-200 mb-4">
+            <Activity size={24} />
+          </div>
           <div className="text-center">
-            <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-400">DG Health M&E</h1>
-            <p className="mt-0.5 text-[10px] font-black uppercase tracking-tight text-blue-600">Provincial Portal</p>
+            <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Health Oversight</h1>
+            <p className="mt-0.5 text-[10px] font-black uppercase tracking-tight text-blue-600">Smart M&E System</p>
           </div>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
           <div className="sidebar-label mt-4">System Governance</div>
           <NavItem view="dashboard" icon={LayoutDashboard} label="Mission Control" />
-          <NavItem view="facilities" icon={MapPin} label="KPK Facilities" />
+          <NavItem view="facilities" icon={MapPin} label="Regional Facilities" />
           <NavItem view="reports" icon={History} label="Audit Archives" />
           {user?.isAdmin && (
             <NavItem view="users" icon={User} label="Manage Users" />
@@ -760,13 +754,10 @@ export default function App() {
         {/* Header */}
         <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3 lg:hidden">
-            <img 
-              src="/input_file_2.png" 
-              alt="Logo" 
-              className="h-10 w-auto" 
-              referrerPolicy="no-referrer"
-            />
-            <h1 className="font-black text-[10px] text-blue-600 tracking-tighter uppercase">DG Health M&E</h1>
+            <div className="p-2 bg-blue-600 rounded-xl text-white shadow-md">
+              <Activity size={20} />
+            </div>
+            <h1 className="font-black text-[10px] text-blue-600 tracking-tighter uppercase">Health Oversight</h1>
           </div>
           
           <div className="flex-1 max-w-md hidden md:block">
@@ -838,12 +829,9 @@ export default function App() {
               >
                 <div className="flex items-end justify-between">
                   <div className="flex items-center gap-6">
-                    <img 
-                      src="/input_file_2.png" 
-                      alt="KP Health Logo" 
-                      className="h-16 w-auto object-contain" 
-                      referrerPolicy="no-referrer"
-                    />
+                    <div className="p-4 bg-blue-600 rounded-3xl text-white shadow-xl shadow-blue-200">
+                      <Activity size={40} />
+                    </div>
                     <div>
                       <h2 className="text-3xl font-bold tracking-tight text-slate-900">Health Monitoring Overview</h2>
                       <p className="text-slate-500 mt-1">Real-time performance metrics across the province.</p>
@@ -1356,7 +1344,7 @@ export default function App() {
                       onClick={handleSubmitVisit}
                     >
                       <CheckCircle2 size={18} />
-                      <span>Submit KPK Audit Report</span>
+                      <span>Submit Official Audit Report</span>
                     </button>
                   </div>
                 </div>
