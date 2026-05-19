@@ -590,7 +590,7 @@ export default function App() {
                   type="submit" 
                   className="w-full py-4 mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-[0.98]"
                 >
-                  <span>{authMode === 'login' ? 'Initialize Secure Session' : 'Active Personnel Profile'}</span>
+                  <span>{authMode === 'login' ? 'Verify & Access' : 'Register Official Account'}</span>
                   <ChevronRight size={20} />
                 </button>
               </form>
