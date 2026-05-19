@@ -424,7 +424,12 @@ export default function App() {
             {/* Header Section */}
             <div className="bg-slate-50/50 p-8 pt-10 text-center border-b border-slate-100">
               <div className="mb-6 flex justify-center">
-                <img src="/input_file_0.png" alt="KP Health Logo" className="h-20 w-auto object-contain" />
+                <img 
+                  src="/input_file_0.png" 
+                  alt="KP Health Logo" 
+                  className="h-28 w-auto object-contain" 
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
                 DG HEALTH M&E PORTAL
@@ -684,9 +689,14 @@ export default function App() {
       {/* Sidebar Navigation */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col hidden lg:flex">
         <div className="p-6 border-b border-slate-100 mb-2">
-          <img src="/input_file_0.png" alt="KP Health Logo" className="h-10 w-auto object-contain mb-3" />
-          <h1 className="text-[9px] font-black uppercase tracking-widest text-slate-400">DG Health M&E</h1>
-          <p className="mt-0.5 text-[9px] font-black uppercase tracking-tight text-blue-600">Provincial Portal</p>
+          <img 
+            src="/input_file_1.png" 
+            alt="KP Health Logo" 
+            className="h-16 w-auto object-contain mb-2 mx-auto" 
+            referrerPolicy="no-referrer"
+          />
+          <h1 className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center">DG Health M&E</h1>
+          <p className="mt-0.5 text-[9px] font-black uppercase tracking-tight text-blue-600 text-center">Provincial Portal</p>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
@@ -747,7 +757,12 @@ export default function App() {
         {/* Header */}
         <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3 lg:hidden">
-            <img src="/input_file_0.png" alt="Logo" className="h-8 w-auto" />
+            <img 
+              src="/input_file_1.png" 
+              alt="Logo" 
+              className="h-10 w-auto" 
+              referrerPolicy="no-referrer"
+            />
             <h1 className="font-black text-[10px] text-blue-600 tracking-tighter uppercase">DG Health M&E</h1>
           </div>
           
@@ -1241,7 +1256,7 @@ export default function App() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                         {capturedPhotos.map((photo, idx) => (
                           <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200">
-                            <img src={photo} alt="Evidence" className="w-full h-full object-cover" />
+                            <img src={photo} alt="Evidence" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             <button 
                               onClick={() => removePhoto(idx)}
                               className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
