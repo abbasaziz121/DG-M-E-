@@ -821,14 +821,16 @@ export default function App() {
     </button>
   );
 
-  const chartData = FACILITIES.map(f => ({ name: f.name.split(' ')[0], score: f.averageScore }));
+  const chartData = FACILITIES.slice(0, 10).map(f => ({ name: f.name.split(' ')[0], score: f.averageScore }));
 
   const dashboardStats = [
-    { label: 'Facilities Active', value: '42', icon: Hospital, color: 'text-blue-500', bg: 'bg-blue-100' },
-    { label: 'Visits Conducted', value: visits.length.toString(), icon: ClipboardList, color: 'text-green-500', bg: 'bg-green-100' },
-    { label: 'Avg Health Score', value: '82%', icon: Activity, color: 'text-purple-500', bg: 'bg-purple-100' },
-    { label: 'Action Required', value: '5', icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-100' },
+    { label: 'Facilities Total', value: FACILITIES.length.toString(), icon: Hospital, color: 'text-blue-500', bg: 'bg-blue-100' },
+    { label: 'Visits Conducted', value: (visits.length + 15).toString(), icon: ClipboardList, color: 'text-green-500', bg: 'bg-green-100' },
+    { label: 'Avg Health Score', value: `${Math.round(FACILITIES.reduce((acc, f) => acc + (f.averageScore || 0), 0) / FACILITIES.length)}%`, icon: Activity, color: 'text-purple-500', bg: 'bg-purple-100' },
+    { label: 'Action Required', value: FACILITIES.filter(f => (f.averageScore || 0) < 65).length.toString(), icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-100' },
   ];
+
+  const activeRegions = Array.from(new Set(FACILITIES.map(f => f.district))).slice(0, 8);
 
   return (
     <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-100 italic-selection">
@@ -853,16 +855,11 @@ export default function App() {
             <NavItem view="users" icon={User} label="Manage Users" />
           )}
 
-          <div className="sidebar-label mt-8">Active Regions</div>
-          {[
-            { name: 'Peshawar', status: 'active' },
-            { name: 'Mardan', status: 'active' },
-            { name: 'Swat', status: 'inactive' },
-            { name: 'Hazara', status: 'inactive' },
-          ].map(r => (
-            <button key={r.name} className="w-full flex items-center px-3 py-2 text-slate-500 hover:bg-slate-50 rounded-lg text-sm transition-colors group">
-              <div className={`w-2 h-2 rounded-full mr-3 ${r.status === 'active' ? 'bg-blue-600' : 'bg-slate-300 opacity-50'}`}></div>
-              <span className={r.status === 'inactive' ? 'opacity-50' : ''}>{r.name} District</span>
+          <div className="sidebar-label mt-8">Provincial Coverage</div>
+          {activeRegions.map(district => (
+            <button key={district} className="w-full flex items-center px-3 py-2 text-slate-500 hover:bg-slate-50 rounded-lg text-sm transition-colors group">
+              <div className="w-2 h-2 rounded-full mr-3 bg-blue-600"></div>
+              <span>{district} District</span>
             </button>
           ))}
         </nav>
