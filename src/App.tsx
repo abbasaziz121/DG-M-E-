@@ -423,8 +423,8 @@ export default function App() {
           <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20">
             {/* Header Section */}
             <div className="bg-slate-50/50 p-8 pt-10 text-center border-b border-slate-100">
-              <div className="inline-flex p-4 bg-blue-600 rounded-3xl text-white mb-6 shadow-xl shadow-blue-200/50">
-                {authMode === 'login' ? <Activity size={32} /> : <UserPlus size={32} />}
+              <div className="mb-6 flex justify-center">
+                <img src="/input_file_0.png" alt="KP Health Logo" className="h-20 w-auto object-contain" />
               </div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
                 DG HEALTH M&E PORTAL
@@ -683,9 +683,10 @@ export default function App() {
     <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-100 italic-selection">
       {/* Sidebar Navigation */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col hidden lg:flex">
-        <div className="p-6">
-          <h1 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">DG HEALTH M&E PORTAL</h1>
-          <p className="mt-1 text-[10px] font-black uppercase tracking-tight text-blue-600">MONITORING & EVALUATION SYSTEM</p>
+        <div className="p-6 border-b border-slate-100 mb-2">
+          <img src="/input_file_0.png" alt="KP Health Logo" className="h-10 w-auto object-contain mb-3" />
+          <h1 className="text-[9px] font-black uppercase tracking-widest text-slate-400">DG Health M&E</h1>
+          <p className="mt-0.5 text-[9px] font-black uppercase tracking-tight text-blue-600">Provincial Portal</p>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
@@ -745,8 +746,9 @@ export default function App() {
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
         <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-4 lg:hidden">
-            <h1 className="font-bold text-blue-600">DG HEALTH M&E PORTAL</h1>
+          <div className="flex items-center gap-3 lg:hidden">
+            <img src="/input_file_0.png" alt="Logo" className="h-8 w-auto" />
+            <h1 className="font-black text-[10px] text-blue-600 tracking-tighter uppercase">DG Health M&E</h1>
           </div>
           
           <div className="flex-1 max-w-md hidden md:block">
