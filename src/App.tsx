@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle, ImageRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { 
   BarChart, 
@@ -446,95 +446,361 @@ export default function App() {
   };
 
   const downloadSingleExcel = (v: any) => {
-    const dataToExport = [{
-      'Visit ID': v.id,
-      'Facility Name': v.facilityName,
-      'Date': v.date,
-      'Performance Score (%)': v.score,
-      'Rating': v.rating,
-      'Status': v.status,
-      'Recommendations': v.recommendations || 'No recommendations provided',
-      'Auditor': v.inspector || 'DG Health Official'
-    }];
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    // Sheet 1: Overview
+    const overviewData = [
+      { 'Field': 'Visit ID', 'Value': `#${v.id}` },
+      { 'Field': 'Facility Name', 'Value': v.facilityName },
+      { 'Field': 'Audit Date', 'Value': v.date },
+      { 'Field': 'Overall Score', 'Value': `${v.score}%` },
+      { 'Field': 'Performance Rating', 'Value': v.rating },
+      { 'Field': 'Status', 'Value': v.status },
+      { 'Field': 'Lead M&E Auditor', 'Value': v.inspector || 'Abbas Aziz' },
+      { 'Field': 'Overall Executive Recommendations', 'Value': v.recommendations || 'No recommendations recorded.' },
+      { 'Field': 'Total Photos Attached', 'Value': v.photos ? v.photos.length : 0 }
+    ];
+    
+    // Sheet 2: Detailed Checklist
+    const checklistData: any[] = [];
+    CHECKLIST_CATEGORIES.forEach((cat) => {
+      cat.questions.forEach((q) => {
+        const scoreVal = v.scores?.[q.id];
+        let displayScore = 'N/A';
+        if (scoreVal !== undefined && scoreVal !== -1) {
+          displayScore = `${scoreVal} / 5`;
+        }
+        
+        const obs = v.checklistObservations?.[q.id] || '';
+        const photo = v.checklistPhotos?.[q.id] ? 'Attached' : 'None';
+        
+        checklistData.push({
+          'Checklist Category': cat.title,
+          'Metric ID': q.id,
+          'Checklist Assessment Point': q.question,
+          'Score (1-5)': displayScore,
+          'Specific Observation / Finding': obs,
+          'Witness Photo': photo
+        });
+      });
+    });
+
+    const worksheet1 = XLSX.utils.json_to_sheet(overviewData);
+    const worksheet2 = XLSX.utils.json_to_sheet(checklistData);
+    
+    // Set columns widths
+    worksheet1['!cols'] = [{ wch: 35 }, { wch: 65 }];
+    worksheet2['!cols'] = [{ wch: 25 }, { wch: 12 }, { wch: 55 }, { wch: 12 }, { wch: 55 }, { wch: 15 }];
+
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
-    XLSX.writeFile(workbook, `Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date.replace(/[:\s]/g, '_')}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet1, "Overview Summary");
+    XLSX.utils.book_append_sheet(workbook, worksheet2, "Checklist Scores & Observations");
+    
+    XLSX.writeFile(workbook, `Full_Audit_Report_${v.facilityName.replace(/\s+/g, '_')}_${v.date.replace(/[:\s]/g, '_')}.xlsx`);
   };
 
   const downloadSingleWord = async (v: any) => {
+    const reportComponents: any[] = [];
+
+    // Title Block
+    reportComponents.push(
+      new Paragraph({
+        text: "PROVINCIAL HEALTH SERVICES M&E PORTAL",
+        heading: HeadingLevel.HEADING_1,
+        alignment: AlignmentType.CENTER,
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "OFFICIAL HEALTH FACILITY MONITORING & AUDIT REPORT",
+            bold: true,
+            size: 26,
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+      }),
+      new Paragraph({ text: "" }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `This document serves as the official compiled provincial verification score, comprehensive audit checklist results, key observations, and recommendations collected for the monitoring session.`,
+            italics: true,
+            size: 18,
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+      }),
+      new Paragraph({ text: "" }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "1. VISIT METADATA & SUMMARY", bold: true, size: 22 }),
+        ],
+      }),
+      new Paragraph({ text: "" })
+    );
+
+    // Metadata Table
+    const metadataRows = [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Audit ID", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ text: `#${v.id}` })] }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Facility Name", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ text: v.facilityName })] }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "District Location", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ text: v.district || "Health District Authority" })] }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Audit Date", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ text: v.date })] }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Lead M&E Auditor", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ text: v.inspector || "Abbas Aziz" })] }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Overall Performance Score", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [
+            new TextRun({ text: `${v.score}%`, bold: true }),
+            new TextRun({ text: ` (${v.rating})`, italics: true })
+          ] })] }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Audit Visit Status", bold: true })] })] }),
+          new TableCell({ children: [new Paragraph({ text: v.status || "Completed" })] }),
+        ],
+      })
+    ];
+
+    reportComponents.push(
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: metadataRows,
+      }),
+      new Paragraph({ text: "" })
+    );
+
+    // Section 2: Executive Recommendations and Overall Findings
+    reportComponents.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: "2. EXECUTIVE ACTION RECOMMENDATIONS", bold: true, size: 22 }),
+        ],
+      }),
+      new Paragraph({ text: "" }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: v.recommendations || "No additional recommendations or notes provided during this provincial monitoring visit.", italics: true }),
+        ],
+      }),
+      new Paragraph({ text: "" })
+    );
+
+    // Helper functions for safe base64 decoding in browser M&E environment
+    const base64ToUint8Array = (base64Str: string) => {
+      try {
+        if (!base64Str) return null;
+        const cleanBase64 = base64Str.includes(',') ? base64Str.split(',')[1] : base64Str;
+        const binaryString = window.atob(cleanBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes;
+      } catch (err) {
+        console.error("Failed to parse base64 to Uint8Array for docx image loader:", err);
+        return null;
+      }
+    };
+
+    // Section 3: Full Detailed Checklist Scores & Question-Specific Observations
+    reportComponents.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: "3. DETAILED CHECKLIST ASSESSMENTS & SPECIFIC OBSERVATIONS", bold: true, size: 22 }),
+        ],
+      }),
+      new Paragraph({ text: "" })
+    );
+
+    CHECKLIST_CATEGORIES.forEach((cat) => {
+      // Heading for category
+      reportComponents.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `● SECTION: ${cat.title.toUpperCase()}`, bold: true, size: 18 }),
+          ],
+        }),
+        new Paragraph({ text: "" })
+      );
+
+      // Create detailed table for this checklist block
+      const headerRow = new TableRow({
+        children: [
+          new TableCell({ width: { size: 45, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Checklist Assessment Point", bold: true })] })] }),
+          new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Score Awarded", bold: true })] })] }),
+          new TableCell({ width: { size: 40, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Specific Observations / Notes / Images", bold: true })] })] }),
+        ],
+      });
+
+      const catQuestionRows: TableRow[] = [headerRow];
+
+      cat.questions.forEach((q) => {
+        const scoreVal = v.scores?.[q.id];
+        let displayScore = "N/A";
+        if (scoreVal !== undefined && scoreVal !== -1) {
+          displayScore = `${scoreVal} / 5`;
+        }
+        
+        const obs = v.checklistObservations?.[q.id] || "";
+        const photo = v.checklistPhotos?.[q.id];
+
+        // Prepare child paragraphs for observations and images
+        const obsCellChildren: any[] = [];
+        if (obs) {
+          obsCellChildren.push(new Paragraph({ text: `Observation: "${obs}"` }));
+        }
+        if (photo) {
+          obsCellChildren.push(new Paragraph({ text: "" }));
+          const imgBytes = base64ToUint8Array(photo);
+          if (imgBytes) {
+            try {
+              obsCellChildren.push(
+                new Paragraph({
+                  children: [
+                    new ImageRun({
+                      data: imgBytes.buffer,
+                      transformation: {
+                        width: 140,
+                        height: 105,
+                      },
+                    } as any),
+                  ],
+                }),
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "[Attached Specific Witness Photo]", size: 14, italics: true })
+                  ]
+                })
+              );
+            } catch (imageErr) {
+              obsCellChildren.push(new Paragraph({ text: "[Evidence photo attached: display omitted]" }));
+            }
+          } else {
+            obsCellChildren.push(new Paragraph({ text: "[Evidence photo attached]" }));
+          }
+        }
+        if (!obs && !photo) {
+          obsCellChildren.push(new Paragraph({ text: "—" }));
+        }
+
+        catQuestionRows.push(
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ text: q.question })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: displayScore, bold: scoreVal && scoreVal !== -1 })] })] }),
+              new TableCell({ children: obsCellChildren }),
+            ],
+          })
+        );
+      });
+
+      reportComponents.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: catQuestionRows,
+        }),
+        new Paragraph({ text: "" })
+      );
+    });
+
+    // Section 4: Consolidated Photographic Evidence Gallery (General photos)
+    if (v.photos && v.photos.length > 0) {
+      reportComponents.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "4. INTEGRATED AUDIT FILE PHOTO EVIDENCE GALLERY", bold: true, size: 22 }),
+          ],
+        }),
+        new Paragraph({ text: "" })
+      );
+
+      v.photos.forEach((photo: string, index: number) => {
+        reportComponents.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `- Case Photo #${index + 1}: General Inspector Overview`, bold: true, size: 16 }),
+            ],
+          })
+        );
+        
+        const imgBytes = base64ToUint8Array(photo);
+        if (imgBytes) {
+          try {
+            reportComponents.push(
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: imgBytes.buffer,
+                    transformation: {
+                      width: 280,
+                      height: 210,
+                    },
+                  } as any),
+                ],
+              })
+            );
+          } catch (e) {
+            reportComponents.push(new Paragraph({ text: "[General Evidence Image Content]" }));
+          }
+        } else {
+          reportComponents.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: "[Evidence image path or direct reference placeholder]", italics: true }),
+              ],
+            })
+          );
+        }
+        reportComponents.push(new Paragraph({ text: "" }));
+      });
+    }
+
+    // Official Footer Section
+    reportComponents.push(
+      new Paragraph({ text: "" }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Provincial DG Health M&E Verification Service Protocol", bold: true, size: 14 }),
+        ],
+        alignment: AlignmentType.CENTER,
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "This monitoring document is fully persisted onto the system local secure memory and signed off electronically by the verified representative. Standard regulatory standards apply.", italics: true, size: 14 }),
+        ],
+        alignment: AlignmentType.CENTER,
+      })
+    );
+
     const doc = new Document({
       sections: [{
         properties: {},
-        children: [
-          new Paragraph({
-            text: "DG HEALTH M&E PORTAL",
-            heading: HeadingLevel.HEADING_1,
-            alignment: AlignmentType.CENTER,
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "OFFICIAL AUDIT REPORT",
-                bold: true,
-                size: 28,
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-          }),
-          new Paragraph({ text: "" }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Visit ID", bold: true })] })] }),
-                  new TableCell({ children: [new Paragraph({ text: `#${v.id}` })] }),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Facility Name", bold: true })] })] }),
-                  new TableCell({ children: [new Paragraph({ text: v.facilityName })] }),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Audit Date", bold: true })] })] }),
-                  new TableCell({ children: [new Paragraph({ text: v.date })] }),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Score", bold: true })] })] }),
-                  new TableCell({ children: [new Paragraph({ text: `${v.score}% (${v.rating})` })] }),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Status", bold: true })] })] }),
-                  new TableCell({ children: [new Paragraph({ text: v.status })] }),
-                ],
-              }),
-            ],
-          }),
-          new Paragraph({ text: "" }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Findings & Notes:", bold: true, underline: {} }),
-            ],
-          }),
-          new Paragraph({
-            text: v.recommendations || "No additional recommendations provided during this audit.",
-          }),
-          new Paragraph({ text: "" }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "This is a computer-generated report from the DG Health M&E Provincial Portal.", italics: true, size: 16 }),
-            ],
-            alignment: AlignmentType.CENTER,
-          }),
-        ],
+        children: reportComponents,
       }],
     });
 
