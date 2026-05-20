@@ -36,6 +36,8 @@ export const FACILITIES: Facility[] = [
   { id: '28', name: 'BHU Naurang', type: FacilityType.BHU, district: 'Lakki Marwat', lastVisit: '2024-03-30', averageScore: 74 },
   { id: '29', name: 'RHC Gomal', type: FacilityType.RHC, district: 'Tank', lastVisit: '2024-04-22', averageScore: 67 },
   { id: '30', name: 'THQ Hospital Doaba', type: FacilityType.THQ, district: 'Hangu', lastVisit: '2024-05-11', averageScore: 78 },
+  { id: '31', name: 'Civil Hospital Jamrud', type: FacilityType.THQ, district: 'Khyber', lastVisit: '2024-05-15', averageScore: 84 },
+  { id: '32', name: 'RHC Regi', type: FacilityType.RHC, district: 'Peshawar', lastVisit: '2024-04-10', averageScore: 76 },
 ];
 
 export const CHECKLIST_CATEGORIES = [
