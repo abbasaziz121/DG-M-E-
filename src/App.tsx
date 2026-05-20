@@ -195,6 +195,9 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [checklistScores, setChecklistScores] = useState<Record<string, number>>({});
+  const [checklistObservations, setChecklistObservations] = useState<Record<string, string>>({});
+  const [checklistPhotos, setChecklistPhotos] = useState<Record<string, string>>({});
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
   const [selectedVisitReport, setSelectedVisitReport] = useState<any | null>(null);
@@ -210,7 +213,14 @@ export default function App() {
       opdAvg: '120',
       inspector: 'Abbas Aziz',
       recommendations: 'Female Medical Officer was absent. Biometric attendance terminal was dusty and barely functional. Essential antibiotics are stocked out.',
-      scores: { 'hr1': 4, 'hr2': 1, 'hr3': 3, 'hr4': -1, 'hr5': 2, 'i1': 2, 'i2': 4, 'i3': 3, 'i4': 4, 'e1': 2, 'e2': 4, 'e3': 1, 'e4': -1, 'u1': 4, 'u2': 3, 'u3': 1, 'u4': -1, 'h1': 3, 'h2': 2, 'h3': -1, 'm1': 1, 'm2': 4, 'm3': 2, 'c1': 4, 'c2': 2, 'c3': 4, 'd1': -1, 'd2': -1, 'd3': -1, 'w1': 3, 'w2': 2, 'w3': 1, 'dh1': 4, 'dh2': 2, 'dh3': -1, 's1': 4, 's2': -1, 's3': 3, 's4': -1 }
+      scores: { 'hr1': 4, 'hr2': 1, 'hr3': 3, 'hr4': -1, 'hr5': 2, 'i1': 2, 'i2': 4, 'i3': 3, 'i4': 4, 'e1': 2, 'e2': 4, 'e3': 1, 'e4': -1, 'u1': 4, 'u2': 3, 'u3': 1, 'u4': -1, 'h1': 3, 'h2': 2, 'h3': -1, 'm1': 1, 'm2': 4, 'm3': 2, 'c1': 4, 'c2': 2, 'c3': 4, 'd1': -1, 'd2': -1, 'd3': -1, 'w1': 3, 'w2': 2, 'w3': 1, 'dh1': 4, 'dh2': 2, 'dh3': -1, 's1': 4, 's2': -1, 's3': 3, 's4': -1 },
+      checklistObservations: {
+        'hr2': 'Female Medical Officer is currently absent. No written leaves or backup replacement listed.',
+        'hr4': 'Biometric attendance terminal is covered in dust, and staff indicated the network connection is frequently down.',
+        'm1': 'Crucial pediatric antibiotics, including Amoxicillin, are stocked out completely.',
+        'w1': 'Waste segregation is not practiced perfectly; sharps boxes are sometimes mixed with general waste.'
+      },
+      checklistPhotos: {}
     },
     { 
       id: 'V-2024-002', 
@@ -388,12 +398,16 @@ export default function App() {
       opdAvg: extraInfo.opdAvg || 'N/A',
       recommendations: extraInfo.recommendations || 'None provided.',
       scores: { ...checklistScores },
-      photos: [...capturedPhotos]
+      photos: [...capturedPhotos],
+      checklistObservations: { ...checklistObservations },
+      checklistPhotos: { ...checklistPhotos }
     };
 
     setVisits([newVisit, ...visits]);
     setCapturedPhotos([]);
     setChecklistScores({});
+    setChecklistObservations({});
+    setChecklistPhotos({});
     setExtraInfo({ catchment: '', opdAvg: '', recommendations: '', rating: 'Satisfactory' });
     setSelectedFacility(null);
     setCurrentView('dashboard');
@@ -1389,6 +1403,7 @@ export default function App() {
                               <p className="text-slate-700 font-medium text-sm flex-1">{q.question}</p>
                               <div className="flex items-center gap-1.5 flex-wrap justify-end">
                                 <button
+                                  type="button"
                                   onClick={() => setChecklistScores(prev => ({ ...prev, [q.id]: -1 }))}
                                   className={`px-3 h-9 rounded-lg font-black text-[10px] uppercase tracking-tighter transition-all pointer-events-auto border ${
                                     checklistScores[q.id] === -1 
@@ -1401,6 +1416,7 @@ export default function App() {
                                 {[1, 2, 3, 4, 5].map((val) => (
                                   <button
                                     key={val}
+                                    type="button"
                                     onClick={() => setChecklistScores(prev => ({ ...prev, [q.id]: val }))}
                                     className={`w-9 h-9 rounded-lg font-bold text-xs transition-all pointer-events-auto border ${
                                       checklistScores[q.id] === val 
@@ -1411,6 +1427,61 @@ export default function App() {
                                     {val}
                                   </button>
                                 ))}
+                              </div>
+                            </div>
+
+                            {/* Specific Observation and Specific Image Attachment */}
+                            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                              <div className="md:col-span-8 flex items-center gap-2">
+                                <span className="text-xs font-black text-slate-400 uppercase tracking-wider whitespace-nowrap">Observation:</span>
+                                <input 
+                                  type="text"
+                                  value={checklistObservations[q.id] || ''}
+                                  onChange={(e) => setChecklistObservations(prev => ({ ...prev, [q.id]: e.target.value }))}
+                                  placeholder="Type specific findings or remarks for this point..."
+                                  className="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-400 transition-colors placeholder:text-slate-300 font-medium text-slate-705"
+                                />
+                              </div>
+                              <div className="md:col-span-4 flex items-center justify-end gap-3">
+                                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Photo:</span>
+                                <div className="flex items-center gap-2">
+                                  {checklistPhotos[q.id] ? (
+                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-slate-200 group">
+                                      <img src={checklistPhotos[q.id]} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setChecklistPhotos(prev => {
+                                          const copies = { ...prev };
+                                          delete copies[q.id];
+                                          return copies;
+                                        })}
+                                        className="absolute inset-0 bg-rose-600/95 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <X size={12} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-600 rounded-lg cursor-pointer transition-all active:scale-95 shadow-sm">
+                                      <Camera size={12} className="text-slate-500" />
+                                      <span className="text-[10px] font-black uppercase tracking-wider">Attach</span>
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                              setChecklistPhotos(prev => ({ ...prev, [q.id]: reader.result as string }));
+                                            };
+                                            reader.readAsDataURL(file);
+                                          }
+                                        }}
+                                      />
+                                    </label>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1792,18 +1863,105 @@ export default function App() {
                           { label: 'Human Resources', key: 'hr' },
                           { label: 'Infrastructure', key: 'i' },
                           { label: 'Equipment', key: 'e' },
-                          { label: 'Pharmacy/Supplies', key: 'm' },
-                          { label: 'Cleanliness/WASH', key: 'w' },
+                          { label: 'Pharmacy & Supplies', key: 'm' },
+                          { label: 'Cleanliness & WASH', key: 'w' },
                         ].map(section => {
-                          // Simple mock logic to show section scores if they exist
+                          // Compute real average score for this section
+                          const questionsList = CHECKLIST_CATEGORIES.find(c => c.id === section.key)?.questions || [];
+                          const scoredList = questionsList.map(q => selectedVisitReport.scores?.[q.id]).filter(s => s !== undefined && s !== -1);
+                          const sum = scoredList.reduce((acc, v) => acc + v, 0);
+                          const percentage = scoredList.length > 0 ? Math.round((sum / (scoredList.length * 5)) * 100) : 75;
+
                           return (
                             <div key={section.key} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                               <span className="text-sm font-bold text-slate-700">{section.label}</span>
                               <div className="flex items-center gap-3">
                                 <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500" style={{ width: '75%' }}></div>
+                                  <div className="h-full bg-blue-600 rounded-full" style={{ width: `${percentage}%` }}></div>
                                 </div>
-                                <span className="text-xs font-black text-slate-500 uppercase italic">Optimum</span>
+                                <span className="text-xs font-black text-slate-500 uppercase italic">{percentage}%</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+
+                    {/* Full Checklist Detail Section with Specific Observations & Pictures */}
+                    <section className="space-y-4">
+                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <ClipboardList size={16} className="text-blue-600" />
+                        Full Checklist Scores & Specific Observations
+                      </h3>
+                      
+                      <div className="space-y-6">
+                        {CHECKLIST_CATEGORIES.map((cat) => {
+                          const catScores = cat.questions.map(q => selectedVisitReport.scores?.[q.id]).filter(s => s !== undefined && s !== -1);
+                          const catAvg = catScores.length > 0 ? (catScores.reduce((acc, s) => acc + s, 0) / catScores.length).toFixed(1) : 'N/A';
+                          
+                          return (
+                            <div key={cat.id} className="bg-slate-50 border border-slate-200/60 rounded-3xl p-6 space-y-4">
+                              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                                <h4 className="text-sm font-black text-slate-800 uppercase tracking-wide">{cat.title}</h4>
+                                <div className="text-xs font-black text-slate-500 bg-white border border-slate-200/80 px-3 py-1 rounded-full uppercase italic">
+                                  Avg: <span className="text-blue-600 font-bold">{catAvg} / 5</span>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-3">
+                                {cat.questions.map((q) => {
+                                  const score = selectedVisitReport.scores?.[q.id];
+                                  const obs = selectedVisitReport.checklistObservations?.[q.id];
+                                  const photo = selectedVisitReport.checklistPhotos?.[q.id];
+                                  
+                                  return (
+                                    <div key={q.id} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
+                                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex-1">
+                                          <p className="text-sm font-semibold text-slate-705">{q.question}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Score:</span>
+                                          <span className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                                            score === -1 || score === undefined ? 'bg-slate-100 text-slate-400' :
+                                            score >= 4 ? 'bg-emerald-100 text-emerald-700' :
+                                            score >= 3 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                                          }`}>
+                                            {score === -1 || score === undefined ? 'N/A' : `${score} / 5`}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Specific Observation or Photo specifically for this question inside the report */}
+                                      {(obs || photo) && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2 pt-3 border-t border-slate-50 items-center">
+                                          {obs && (
+                                            <div className="md:col-span-8 space-y-1">
+                                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Specific Observation & Findings</p>
+                                              <p className="text-xs text-slate-600 leading-relaxed font-semibold italic">"{obs}"</p>
+                                            </div>
+                                          )}
+                                          {photo && (
+                                            <div className="md:col-span-4 space-y-1 md:text-right">
+                                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Witness Photo</p>
+                                              <div className="mt-1 flex justify-start md:justify-end">
+                                                <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-slate-150 shadow-sm group">
+                                                  <img 
+                                                    src={photo} 
+                                                    alt="Evidence" 
+                                                    className="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-300" 
+                                                    onClick={() => setPreviewImage(photo)}
+                                                    referrerPolicy="no-referrer"
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           );
@@ -1820,7 +1978,7 @@ export default function App() {
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                           {selectedVisitReport.photos.map((photo: string, idx: number) => (
-                            <div key={idx} className="aspect-square rounded-2xl overflow-hidden shadow-md border border-slate-100 group">
+                            <div key={idx} className="aspect-square rounded-2xl overflow-hidden shadow-md border border-slate-100 group cursor-pointer" onClick={() => setPreviewImage(photo)}>
                               <img 
                                 src={photo} 
                                 alt={`Evidence ${idx + 1}`} 
@@ -1859,6 +2017,35 @@ export default function App() {
                       Close Report
                     </button>
                   </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Witness Photo Fullscreen Preview Overlay Lightbox */}
+          <AnimatePresence>
+            {previewImage && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" id="lightbox-overlay">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setPreviewImage(null)}
+                  className="absolute inset-0 bg-slate-950/90 backdrop-blur-md cursor-zoom-out"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="relative max-w-4xl max-h-[85vh] z-10 rounded-2xl overflow-hidden shadow-2xl border border-slate-800"
+                >
+                  <img src={previewImage} className="w-full h-auto max-h-[80vh] object-contain rounded-xl" referrerPolicy="no-referrer" />
+                  <button 
+                    onClick={() => setPreviewImage(null)}
+                    className="absolute top-4 right-4 p-2 bg-slate-900/80 hover:bg-slate-950/100 transition-colors text-white rounded-full shadow-lg"
+                  >
+                    <X size={20} />
+                  </button>
                 </motion.div>
               </div>
             )}
