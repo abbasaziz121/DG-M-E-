@@ -77,6 +77,19 @@ export const OFFICER_PROFILES = [
     isActive: true
   },
   {
+    email: 'ahmfaiepi@gmail.com',
+    name: 'Admin Ahmfaiepi',
+    role: 'Chief Provincial Administrator',
+    district: 'All Districts',
+    pin: '12345',
+    avatar: 'AP',
+    color: 'bg-indigo-600',
+    description: 'Provincial monitoring and administrator authority.',
+    badge: 'Regional Admin',
+    isAdmin: true,
+    isActive: true
+  },
+  {
     email: 'maria.khan@health.gov.pk',
     name: 'Dr. Maria Khan',
     role: 'Swat Divisional Director',
@@ -129,6 +142,18 @@ export default function App() {
       // Force active status for the main admin email
       users[adminIndex].isActive = true;
       users[adminIndex].isAdmin = true;
+    }
+
+    // Safety check: ensure ahmfaiepi@gmail.com is always present and active
+    const adminIndex2 = users.findIndex((u: any) => u.email === 'ahmfaiepi@gmail.com');
+    if (adminIndex2 === -1) {
+      const defaultAdmin = OFFICER_PROFILES.find((u: any) => u.email === 'ahmfaiepi@gmail.com');
+      if (defaultAdmin) {
+        users = [defaultAdmin, ...users];
+      }
+    } else {
+      users[adminIndex2].isActive = true;
+      users[adminIndex2].isAdmin = true;
     }
     return users;
   });
@@ -243,7 +268,7 @@ export default function App() {
           district: p.district,
           avatar: p.avatar,
           color: p.color,
-          isAdmin: p.email === 'abbasaziz121@gmail.com'
+          isAdmin: p.email === 'abbasaziz121@gmail.com' || p.email === 'ahmfaiepi@gmail.com'
         });
         setFilterMyDistrictOnly(true);
         setCurrentView('dashboard');
@@ -270,7 +295,7 @@ export default function App() {
         isBiometricEnabled: regData.isBiometricEnabled,
         avatar: initials || 'OF',
         color: 'bg-indigo-600',
-        isAdmin: regData.email === 'abbasaziz121@gmail.com',
+        isAdmin: regData.email === 'abbasaziz121@gmail.com' || regData.email === 'ahmfaiepi@gmail.com',
         isActive: true
       };
 
@@ -307,7 +332,7 @@ export default function App() {
         district: p.district,
         avatar: p.avatar,
         color: p.color,
-        isAdmin: p.email === 'abbasaziz121@gmail.com'
+        isAdmin: p.email === 'abbasaziz121@gmail.com' || p.email === 'ahmfaiepi@gmail.com'
       });
       
       setFilterMyDistrictOnly(true);
@@ -323,7 +348,7 @@ export default function App() {
       district: profile.district,
       avatar: profile.avatar,
       color: profile.color,
-      isAdmin: profile.email === 'abbasaziz121@gmail.com'
+      isAdmin: profile.email === 'abbasaziz121@gmail.com' || profile.email === 'ahmfaiepi@gmail.com'
     });
     setFilterMyDistrictOnly(true);
     setCurrentView('dashboard');
