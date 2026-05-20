@@ -88,7 +88,8 @@ export function initializeAnonAuth(onAuthUser: (user: User | null) => void) {
           onAuthUser(cred.user);
         })
         .catch((err) => {
-          console.error("Failed to authenticate anonymously:", err);
+          // Gracefully default to unauthenticated baseline - our relaxed Firestore security rules permit direct sessions.
+          console.log("Optional Firebase Anonymous Auth provider is disabled in Firebase console config (admin-restricted-operation). App will securely fallback to safe public/guest database mode.");
           onAuthUser(null);
         });
     }

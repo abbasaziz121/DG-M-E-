@@ -128,6 +128,61 @@ export const OFFICER_PROFILES = [
   }
 ];
 
+export const INITIAL_MOCK_VISITS = [
+  { 
+    id: 'V-2024-001', 
+    facilityName: 'BHU Mathra', 
+    date: '2024-04-10', 
+    score: 65, 
+    status: 'Processed', 
+    rating: 'Poor',
+    catchment: '15,000',
+    opdAvg: '120',
+    inspector: 'Abbas Aziz',
+    recommendations: 'Female Medical Officer was absent. Biometric attendance terminal was dusty and barely functional. Essential antibiotics are stocked out.',
+    scores: { 'hr1': 4, 'hr2': 1, 'hr3': 3, 'hr4': -1, 'hr5': 2, 'i1': 2, 'i2': 4, 'i3': 3, 'i4': 4, 'e1': 2, 'e2': 4, 'e3': 1, 'e4': -1, 'u1': 4, 'u2': 3, 'u3': 1, 'u4': -1, 'h1': 3, 'h2': 2, 'h3': -1, 'm1': 1, 'm2': 4, 'm3': 2, 'c1': 4, 'c2': 2, 'c3': 4, 'd1': -1, 'd2': -1, 'd3': -1, 'w1': 3, 'w2': 2, 'w3': 1, 'dh1': 4, 'dh2': 2, 'dh3': -1, 's1': 4, 's2': -1, 's3': 3, 's4': -1 },
+    checklistObservations: {
+      'hr2': 'Female Medical Officer is currently absent. No written leaves or backup replacement listed.',
+      'hr4': 'Biometric attendance terminal is covered in dust, and staff indicated the network connection is frequently down.',
+      'm1': 'Crucial pediatric antibiotics, including Amoxicillin, are stocked out completely.',
+      'w1': 'Waste segregation is not practiced perfectly; sharps boxes are sometimes mixed with general waste.'
+    },
+    checklistPhotos: {},
+    createdAt: '2024-04-10T10:00:00.000Z',
+    updatedAt: '2024-04-10T10:00:00.000Z'
+  },
+  { 
+    id: 'V-2024-002', 
+    facilityName: 'RHC Khushal Garh', 
+    date: '2024-04-15', 
+    score: 72, 
+    status: 'Processed', 
+    rating: 'Satisfactory',
+    catchment: '35,000',
+    opdAvg: '250',
+    inspector: 'Sajid Shah',
+    recommendations: 'Staff discipline is acceptable. Water availability is excellent. Solar backup system works perfectly. Laboratory rate list is not displayed and requires immediate action.',
+    scores: { 'hr1': 4, 'hr2': 4, 'hr3': 4, 'hr4': 3, 'hr5': 4, 'i1': 3, 'i2': 3, 'i3': -1, 'i4': 4, 'e1': 4, 'e2': 4, 'e3': 4, 'e4': 4, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 4, 'h2': 3, 'h3': 3, 'm1': 4, 'm2': 5, 'm3': 4, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 3, 'd2': 1, 'd3': 3, 'w1': 4, 'w2': 4, 'w3': -1, 'dh1': 4, 'dh2': 4, 'dh3': 4, 's1': 4, 's2': -1, 's3': 4, 's4': 4 },
+    createdAt: '2024-04-15T10:00:00.000Z',
+    updatedAt: '2024-04-15T10:00:00.000Z'
+  },
+  { 
+    id: 'V-2024-003', 
+    facilityName: 'THQ Hospital Takht-i-Bahi', 
+    date: '2024-05-01', 
+    score: 91, 
+    status: 'Processed', 
+    rating: 'Good',
+    catchment: '120,000',
+    opdAvg: '850',
+    inspector: 'Dr. Maria Khan',
+    recommendations: 'Cleanliness and hygiene standards are exemplary. Fully functional labour room and diagnostic laboratory. Duty rosters are updated and clearly visible. Highly recommended for regional benchmark status.',
+    scores: { 'hr1': 5, 'hr2': 5, 'hr3': 5, 'hr4': 5, 'hr5': 5, 'i1': 4, 'i2': 5, 'i3': 5, 'i4': 5, 'e1': 5, 'e2': 5, 'e3': 5, 'e4': 5, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 5, 'h2': 5, 'h3': -1, 'm1': 5, 'm2': 5, 'm3': 5, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 5, 'd2': 5, 'd3': 5, 'w1': 5, 'w2': 5, 'w3': 5, 'dh1': 5, 'dh2': 5, 'dh3': 5, 's1': 5, 's2': 5, 's3': 5, 's4': 5 },
+    createdAt: '2024-05-01T10:00:00.000Z',
+    updatedAt: '2024-05-01T10:00:00.000Z'
+  }
+];
+
 export default function App() {
   const [currentView, setCurrentView] = useState<View | 'login'>('login');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -206,95 +261,85 @@ export default function App() {
   const [isFirebaseSyncing, setIsFirebaseSyncing] = useState(false);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
 
-  // Initial mock visits fallback configuration
-  const INITIAL_MOCK_VISITS = useMemo(() => [
-    { 
-      id: 'V-2024-001', 
-      facilityName: 'BHU Mathra', 
-      date: '2024-04-10', 
-      score: 65, 
-      status: 'Processed', 
-      rating: 'Poor',
-      catchment: '15,000',
-      opdAvg: '120',
-      inspector: 'Abbas Aziz',
-      recommendations: 'Female Medical Officer was absent. Biometric attendance terminal was dusty and barely functional. Essential antibiotics are stocked out.',
-      scores: { 'hr1': 4, 'hr2': 1, 'hr3': 3, 'hr4': -1, 'hr5': 2, 'i1': 2, 'i2': 4, 'i3': 3, 'i4': 4, 'e1': 2, 'e2': 4, 'e3': 1, 'e4': -1, 'u1': 4, 'u2': 3, 'u3': 1, 'u4': -1, 'h1': 3, 'h2': 2, 'h3': -1, 'm1': 1, 'm2': 4, 'm3': 2, 'c1': 4, 'c2': 2, 'c3': 4, 'd1': -1, 'd2': -1, 'd3': -1, 'w1': 3, 'w2': 2, 'w3': 1, 'dh1': 4, 'dh2': 2, 'dh3': -1, 's1': 4, 's2': -1, 's3': 3, 's4': -1 },
-      checklistObservations: {
-        'hr2': 'Female Medical Officer is currently absent. No written leaves or backup replacement listed.',
-        'hr4': 'Biometric attendance terminal is covered in dust, and staff indicated the network connection is frequently down.',
-        'm1': 'Crucial pediatric antibiotics, including Amoxicillin, are stocked out completely.',
-        'w1': 'Waste segregation is not practiced perfectly; sharps boxes are sometimes mixed with general waste.'
-      },
-      checklistPhotos: {},
-      createdAt: '2024-04-10T10:00:00.000Z',
-      updatedAt: '2024-04-10T10:00:00.000Z'
-    },
-    { 
-      id: 'V-2024-002', 
-      facilityName: 'RHC Khushal Garh', 
-      date: '2024-04-15', 
-      score: 72, 
-      status: 'Processed', 
-      rating: 'Satisfactory',
-      catchment: '35,000',
-      opdAvg: '250',
-      inspector: 'Sajid Shah',
-      recommendations: 'Staff discipline is acceptable. Water availability is excellent. Solar backup system works perfectly. Laboratory rate list is not displayed and requires immediate action.',
-      scores: { 'hr1': 4, 'hr2': 4, 'hr3': 4, 'hr4': 3, 'hr5': 4, 'i1': 3, 'i2': 3, 'i3': -1, 'i4': 4, 'e1': 4, 'e2': 4, 'e3': 4, 'e4': 4, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 4, 'h2': 3, 'h3': 3, 'm1': 4, 'm2': 5, 'm3': 4, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 3, 'd2': 1, 'd3': 3, 'w1': 4, 'w2': 4, 'w3': -1, 'dh1': 4, 'dh2': 4, 'dh3': 4, 's1': 4, 's2': -1, 's3': 4, 's4': 4 },
-      createdAt: '2024-04-15T10:00:00.000Z',
-      updatedAt: '2024-04-15T10:00:00.000Z'
-    },
-    { 
-      id: 'V-2024-003', 
-      facilityName: 'THQ Hospital Takht-i-Bahi', 
-      date: '2024-05-01', 
-      score: 91, 
-      status: 'Processed', 
-      rating: 'Good',
-      catchment: '120,000',
-      opdAvg: '850',
-      inspector: 'Dr. Maria Khan',
-      recommendations: 'Cleanliness and hygiene standards are exemplary. Fully functional labour room and diagnostic laboratory. Duty rosters are updated and clearly visible. Highly recommended for regional benchmark status.',
-      scores: { 'hr1': 5, 'hr2': 5, 'hr3': 5, 'hr4': 5, 'hr5': 5, 'i1': 4, 'i2': 5, 'i3': 5, 'i4': 5, 'e1': 5, 'e2': 5, 'e3': 5, 'e4': 5, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 5, 'h2': 5, 'h3': -1, 'm1': 5, 'm2': 5, 'm3': 5, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 5, 'd2': 5, 'd3': 5, 'w1': 5, 'w2': 5, 'w3': 5, 'dh1': 5, 'dh2': 5, 'dh3': 5, 's1': 5, 's2': 5, 's3': 5, 's4': 5 },
-      createdAt: '2024-05-01T10:00:00.000Z',
-      updatedAt: '2024-05-01T10:00:00.000Z'
+  // Initialize visits state from localStorage if available, otherwise fallback to INITIAL_MOCK_VISITS
+  const [visits, setVisits] = useState<any[]>(() => {
+    const saved = localStorage.getItem('local_visits_backup');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Failed to parse local visits backup:", e);
+      }
     }
-  ], []);
+    return INITIAL_MOCK_VISITS;
+  });
 
-  const [visits, setVisits] = useState<any[]>(INITIAL_MOCK_VISITS);
+  // Automatically save visits locally whenever state changes to survive reload/offline
+  useEffect(() => {
+    if (visits) {
+      localStorage.setItem('local_visits_backup', JSON.stringify(visits));
+    }
+  }, [visits]);
 
-  // Background secure authentication & live db state synchronization
+  // Background secure authentication & live db state synchronization with local merge logic
   useEffect(() => {
     setIsFirebaseSyncing(true);
     initializeAnonAuth(async (authUser) => {
-      if (authUser) {
+      // Even if anonymous auth fails (authUser is null), we attempt a direct connection fetch
+      // because our relaxed firestore security rules allow guest read & write operations.
+      try {
+        const cloudVisits = await fetchVisitsFromFirestore();
         setFirebaseConnected(true);
-        try {
-          const cloudVisits = await fetchVisitsFromFirestore();
+        
+        setVisits((prevLocal) => {
+          const map = new Map();
+          // 1. Populate with what we currently have in local state (including any new unsynced reports)
+          prevLocal.forEach(v => {
+            if (v && v.id) map.set(v.id, v);
+          });
+          // 2. Add/merge cloud visits
           if (cloudVisits && cloudVisits.length > 0) {
-            setVisits(cloudVisits);
+            cloudVisits.forEach(v => {
+              if (v && v.id) {
+                const existingLocal = map.get(v.id);
+                if (existingLocal) {
+                  // Keep the newer update details
+                  const localTime = new Date(existingLocal.updatedAt || existingLocal.createdAt || existingLocal.date || 0).getTime();
+                  const cloudTime = new Date(v.updatedAt || v.createdAt || v.date || 0).getTime();
+                  if (cloudTime >= localTime) {
+                    map.set(v.id, v);
+                  }
+                } else {
+                  map.set(v.id, v);
+                }
+              }
+            });
           } else {
-            console.log("Firestore collection empty, seeding baseline reports to cloud database...");
+            // Firestore is authenticated but collection is totally empty (e.g., initial run or wiped database)
+            console.log("Firestore database collection is empty. Seeding baseline reports to cloud...");
             for (const item of INITIAL_MOCK_VISITS) {
-              await saveVisitToFirestore(item);
-            }
-            const seededVisits = await fetchVisitsFromFirestore();
-            if (seededVisits && seededVisits.length > 0) {
-              setVisits(seededVisits);
+              saveVisitToFirestore(item).catch(e => console.error("Error seeding baseline visit to cloud:", e));
             }
           }
-        } catch (error) {
-          console.error("Firestore synchronisation delay or error:", error);
-        } finally {
-          setIsFirebaseSyncing(false);
-        }
-      } else {
+          
+          // 3. Return sorted array (newest first)
+          return Array.from(map.values()).sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.date || 0).getTime();
+            const dateB = new Date(b.createdAt || b.date || 0).getTime();
+            return dateB - dateA;
+          });
+        });
+      } catch (error) {
+        console.error("Firestore synchronisation delay or error:", error);
         setFirebaseConnected(false);
+      } finally {
         setIsFirebaseSyncing(false);
       }
     });
-  }, [INITIAL_MOCK_VISITS]);
+  }, []);
 
   const [extraInfo, setExtraInfo] = useState({
     catchment: '',

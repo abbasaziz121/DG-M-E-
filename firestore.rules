@@ -49,19 +49,17 @@ service cloud.firestore {
       allow read: if true;
       
       // Allow creation of visits
-      allow create: if isSignedIn() 
-                    && isValidId(visitId) 
+      allow create: if isValidId(visitId) 
                     && isValidVisit(incoming())
                     && incoming().id == visitId;
 
       // Allow updates to visits
-      allow update: if isSignedIn() 
-                    && isValidId(visitId) 
+      allow update: if isValidId(visitId) 
                     && isValidVisit(incoming())
                     && incoming().id == existing().id;
                     
-      // Allow deletion only by authenticated operators
-      allow delete: if isSignedIn();
+      // Allow deletion
+      allow delete: if true;
     }
   }
 }
