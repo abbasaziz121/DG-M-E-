@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for secure Attribute-Based Access Control (ABAC)
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function isSignedIn() { 
+      return request.auth != null; 
+    }
+
+    function incoming() { 
+      return request.resource.data; 
+    }
+    
+    function existing() { 
+      return resource.data; 
+    }
+
+    // Entity structure validation for audits/visits
+    function isValidVisit(data) {
+      return data.id is string
+        && data.id.size() <= 64
+        && data.facilityName is string
+        && data.facilityName.size() <= 256
+        && data.date is string
+        && data.date.size() <= 128
+        && data.score is number
+        && data.score >= 0
+        && data.score <= 100
+        && (data.status == null || (data.status is string && data.status.size() <= 64))
+        && (data.rating == null || (data.rating is string && data.rating.size() <= 64))
+        && (data.catchment == null || (data.catchment is string && data.catchment.size() <= 128))
+        && (data.opdAvg == null || (data.opdAvg is string && data.opdAvg.size() <= 128))
+        && (data.inspector == null || (data.inspector is string && data.inspector.size() <= 256))
+        && (data.recommendations == null || (data.recommendations is string && data.recommendations.size() <= 4096));
+    }
+
+    // Match block with custom schema validation enforcements
+    match /visits/{visitId} {
+      // Allow any visitor to list or get audit summaries for reporting and analytics charts
+      allow read: if true;
+      
+      // Allow creation of visits
+      allow create: if isSignedIn() 
+                    && isValidId(visitId) 
+                    && isValidVisit(incoming())
+                    && incoming().id == visitId;
+
+      // Allow updates to visits
+      allow update: if isSignedIn() 
+                    && isValidId(visitId) 
+                    && isValidVisit(incoming())
+                    && incoming().id == existing().id;
+                    
+      // Allow deletion only by authenticated operators
+      allow delete: if isSignedIn();
+    }
+  }
+}

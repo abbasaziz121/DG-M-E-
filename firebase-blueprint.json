@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "Visit": {
+      "title": "Visit",
+      "description": "Represents an audit/monitoring visit report of a healthcare facility.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Visit identifier"
+        },
+        "facilityName": {
+          "type": "string",
+          "description": "Name of the audited healthcare facility"
+        },
+        "date": {
+          "type": "string",
+          "description": "Audit execution date (YYYY-MM-DD or formatted)"
+        },
+        "score": {
+          "type": "number",
+          "description": "Performance compliance percentage (0-100)"
+        },
+        "rating": {
+          "type": "string",
+          "description": "Performance classification tag, e.g. Satisfactory, Unsatisfactory"
+        },
+        "status": {
+          "type": "string",
+          "description": "Audit report completion status, e.g. Completed, Draft or In Progress"
+        },
+        "catchment": {
+          "type": "string",
+          "description": "Catchment population size"
+        },
+        "opdAvg": {
+          "type": "string",
+          "description": "Average daily OPD patients size"
+        },
+        "inspector": {
+          "type": "string",
+          "description": "Monitoring and evaluation lead auditor name"
+        },
+        "recommendations": {
+          "type": "string",
+          "description": "Executive recommendations and summary of findings"
+        },
+        "scores": {
+          "type": "object",
+          "description": "Key-value mapping of checklist item ID to numeric scorecard values (-1 to 5)"
+        },
+        "checklistObservations": {
+          "type": "object",
+          "description": "Key-value mapping of checklist item ID to detailed text observations"
+        },
+        "checklistPhotos": {
+          "type": "object",
+          "description": "Key-value mapping of checklist item ID to captured base64 evidence image data URLs"
+        },
+        "photos": {
+          "type": "array",
+          "description": "Array of general captured witness photo base64 strings"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp indicating document creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp indicating document modification"
+        }
+      },
+      "required": ["id", "facilityName", "date", "score"]
+    }
+  },
+  "firestore": {
+    "visits/{visitId}": {
+      "schema": "Visit",
+      "description": "Healthcare facility monitoring and audit compliance reports"
+    }
+  }
+}

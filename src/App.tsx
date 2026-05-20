@@ -61,6 +61,7 @@ import {
 
 import { FACILITIES, CHECKLIST_CATEGORIES } from './constants';
 import { View, Facility, FacilityType } from './types';
+import { initializeAnonAuth, fetchVisitsFromFirestore, saveVisitToFirestore } from './firebase';
 
 export const OFFICER_PROFILES = [
   {
@@ -201,7 +202,12 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
   const [selectedVisitReport, setSelectedVisitReport] = useState<any | null>(null);
-  const [visits, setVisits] = useState<any[]>([
+
+  const [isFirebaseSyncing, setIsFirebaseSyncing] = useState(false);
+  const [firebaseConnected, setFirebaseConnected] = useState(false);
+
+  // Initial mock visits fallback configuration
+  const INITIAL_MOCK_VISITS = useMemo(() => [
     { 
       id: 'V-2024-001', 
       facilityName: 'BHU Mathra', 
@@ -220,7 +226,9 @@ export default function App() {
         'm1': 'Crucial pediatric antibiotics, including Amoxicillin, are stocked out completely.',
         'w1': 'Waste segregation is not practiced perfectly; sharps boxes are sometimes mixed with general waste.'
       },
-      checklistPhotos: {}
+      checklistPhotos: {},
+      createdAt: '2024-04-10T10:00:00.000Z',
+      updatedAt: '2024-04-10T10:00:00.000Z'
     },
     { 
       id: 'V-2024-002', 
@@ -233,7 +241,9 @@ export default function App() {
       opdAvg: '250',
       inspector: 'Sajid Shah',
       recommendations: 'Staff discipline is acceptable. Water availability is excellent. Solar backup system works perfectly. Laboratory rate list is not displayed and requires immediate action.',
-      scores: { 'hr1': 4, 'hr2': 4, 'hr3': 4, 'hr4': 3, 'hr5': 4, 'i1': 3, 'i2': 3, 'i3': -1, 'i4': 4, 'e1': 4, 'e2': 4, 'e3': 4, 'e4': 4, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 4, 'h2': 3, 'h3': 3, 'm1': 4, 'm2': 5, 'm3': 4, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 3, 'd2': 1, 'd3': 3, 'w1': 4, 'w2': 4, 'w3': -1, 'dh1': 4, 'dh2': 4, 'dh3': 4, 's1': 4, 's2': -1, 's3': 4, 's4': 4 }
+      scores: { 'hr1': 4, 'hr2': 4, 'hr3': 4, 'hr4': 3, 'hr5': 4, 'i1': 3, 'i2': 3, 'i3': -1, 'i4': 4, 'e1': 4, 'e2': 4, 'e3': 4, 'e4': 4, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 4, 'h2': 3, 'h3': 3, 'm1': 4, 'm2': 5, 'm3': 4, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 3, 'd2': 1, 'd3': 3, 'w1': 4, 'w2': 4, 'w3': -1, 'dh1': 4, 'dh2': 4, 'dh3': 4, 's1': 4, 's2': -1, 's3': 4, 's4': 4 },
+      createdAt: '2024-04-15T10:00:00.000Z',
+      updatedAt: '2024-04-15T10:00:00.000Z'
     },
     { 
       id: 'V-2024-003', 
@@ -246,9 +256,46 @@ export default function App() {
       opdAvg: '850',
       inspector: 'Dr. Maria Khan',
       recommendations: 'Cleanliness and hygiene standards are exemplary. Fully functional labour room and diagnostic laboratory. Duty rosters are updated and clearly visible. Highly recommended for regional benchmark status.',
-      scores: { 'hr1': 5, 'hr2': 5, 'hr3': 5, 'hr4': 5, 'hr5': 5, 'i1': 4, 'i2': 5, 'i3': 5, 'i4': 5, 'e1': 5, 'e2': 5, 'e3': 5, 'e4': 5, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 5, 'h2': 5, 'h3': -1, 'm1': 5, 'm2': 5, 'm3': 5, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 5, 'd2': 5, 'd3': 5, 'w1': 5, 'w2': 5, 'w3': 5, 'dh1': 5, 'dh2': 5, 'dh3': 5, 's1': 5, 's2': 5, 's3': 5, 's4': 5 }
-    },
-  ]);
+      scores: { 'hr1': 5, 'hr2': 5, 'hr3': 5, 'hr4': 5, 'hr5': 5, 'i1': 4, 'i2': 5, 'i3': 5, 'i4': 5, 'e1': 5, 'e2': 5, 'e3': 5, 'e4': 5, 'u1': 5, 'u2': 4, 'u3': 5, 'u4': 4, 'h1': 5, 'h2': 5, 'h3': -1, 'm1': 5, 'm2': 5, 'm3': 5, 'c1': 5, 'c2': 5, 'c3': 5, 'd1': 5, 'd2': 5, 'd3': 5, 'w1': 5, 'w2': 5, 'w3': 5, 'dh1': 5, 'dh2': 5, 'dh3': 5, 's1': 5, 's2': 5, 's3': 5, 's4': 5 },
+      createdAt: '2024-05-01T10:00:00.000Z',
+      updatedAt: '2024-05-01T10:00:00.000Z'
+    }
+  ], []);
+
+  const [visits, setVisits] = useState<any[]>(INITIAL_MOCK_VISITS);
+
+  // Background secure authentication & live db state synchronization
+  useEffect(() => {
+    setIsFirebaseSyncing(true);
+    initializeAnonAuth(async (authUser) => {
+      if (authUser) {
+        setFirebaseConnected(true);
+        try {
+          const cloudVisits = await fetchVisitsFromFirestore();
+          if (cloudVisits && cloudVisits.length > 0) {
+            setVisits(cloudVisits);
+          } else {
+            console.log("Firestore collection empty, seeding baseline reports to cloud database...");
+            for (const item of INITIAL_MOCK_VISITS) {
+              await saveVisitToFirestore(item);
+            }
+            const seededVisits = await fetchVisitsFromFirestore();
+            if (seededVisits && seededVisits.length > 0) {
+              setVisits(seededVisits);
+            }
+          }
+        } catch (error) {
+          console.error("Firestore synchronisation delay or error:", error);
+        } finally {
+          setIsFirebaseSyncing(false);
+        }
+      } else {
+        setFirebaseConnected(false);
+        setIsFirebaseSyncing(false);
+      }
+    });
+  }, [INITIAL_MOCK_VISITS]);
+
   const [extraInfo, setExtraInfo] = useState({
     catchment: '',
     opdAvg: '',
@@ -387,8 +434,9 @@ export default function App() {
     const formattedDate = `${now.toISOString().split('T')[0]} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     const currentYear = now.getFullYear();
     const newVisitNum = visits.length + 1;
+    const newId = `V-${currentYear}-${newVisitNum.toString().padStart(3, '0')}`;
     const newVisit = {
-      id: `V-${currentYear}-${newVisitNum.toString().padStart(3, '0')}`,
+      id: newId,
       facilityName: selectedFacility.name,
       date: formattedDate,
       score: totalScore,
@@ -400,10 +448,23 @@ export default function App() {
       scores: { ...checklistScores },
       photos: [...capturedPhotos],
       checklistObservations: { ...checklistObservations },
-      checklistPhotos: { ...checklistPhotos }
+      checklistPhotos: { ...checklistPhotos },
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
     };
 
-    setVisits([newVisit, ...visits]);
+    setIsFirebaseSyncing(true);
+    saveVisitToFirestore(newVisit)
+      .then(() => {
+        setVisits(prev => [newVisit, ...prev]);
+        setIsFirebaseSyncing(false);
+      })
+      .catch((err) => {
+        console.error("Failed to commit audit report to cloud datastore, updating local cache:", err);
+        setVisits(prev => [newVisit, ...prev]);
+        setIsFirebaseSyncing(false);
+      });
+
     setCapturedPhotos([]);
     setChecklistScores({});
     setChecklistObservations({});
@@ -1244,11 +1305,13 @@ export default function App() {
               </div>
             )}
             <div className="flex items-center space-x-3 pr-6 border-r border-slate-100 hidden md:flex">
-               <div className="text-right">
-                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">System Status</p>
+               <div className="text-right flex flex-col items-end justify-center">
+                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">Database Sync</p>
                   <div className="flex items-center space-x-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-xs font-bold text-slate-600">Operational</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${firebaseConnected ? 'bg-emerald-500' : 'bg-rose-500'} ${isFirebaseSyncing ? 'animate-ping' : 'animate-pulse'}`}></span>
+                    <span className="text-xs font-bold text-slate-600">
+                      {isFirebaseSyncing ? 'Syncing...' : firebaseConnected ? 'Cloud Active' : 'Offline'}
+                    </span>
                   </div>
                </div>
             </div>
